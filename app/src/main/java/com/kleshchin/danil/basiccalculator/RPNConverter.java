@@ -128,4 +128,9 @@ public class RPNConverter {
         }
         return result;
     }
+
+    private String checkForCorrectInputting(ArrayList<String> inputArrayString ) {
+        String result = "";
+        return result;
+    }
 }
