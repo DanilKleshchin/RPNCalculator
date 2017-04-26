@@ -21,6 +21,7 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
     TextView textView;
     ArrayList<String> inputArray = new ArrayList<>();
     boolean haveDot = false;
+    boolean clickOperationButton = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +67,11 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
 
         try {
             sharedPreferences = getPreferences(MODE_PRIVATE);
-            textView.setText(sharedPreferences.getString("value", ""));
-            inputArray.add(textView.getText().toString());
+            String res = sharedPreferences.getString("value", "");
+            if (!res.equals("")) {
+                textView.setText(res);
+                inputArray.add(res);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -77,11 +81,13 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
     protected void onStop() {
         super.onStop();
         String res = textView.getText().toString();
-        char [] operations = {'+', '-', '*', '/'};
-        for(char c : operations) {
-            if (res.contains(String.valueOf(c))) {
-                res = RPNConverter.ConvertRPNToResultString(RPNConverter.convertStringToRPN(inputArray));
-                break;
+        if (!res.equals("")) {
+            char[] operations = {'+', '-', '*', '/'};
+            for (char c : operations) {
+                if (res.contains(String.valueOf(c))) {
+                    res = RPNConverter.ConvertRPNToResultString(RPNConverter.convertStringToRPN(inputArray));
+                    break;
+                }
             }
         }
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -90,98 +96,102 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
     }
 
 
-
     @Override
     public void onClick(View view) {
 
         switch (view.getId()) {
             case R.id.btnDot:
                 if (!haveDot) {
-                    if (!textView.getText().toString().contains("Infinity") || textView.getText().toString().contains("NaN")) {
+                    if (!textView.getText().toString().contains("Infinity") && !textView.getText().toString().contains("NaN")) {
                         if (textView.getText().toString().equals("")) {
                             textView.setText("0.");
-                            inputArray.add("0.");
-                            haveDot = true;
+                            if (!clickOperationButton) {
+                                haveDot = true;
+                                if (inputArray.isEmpty()) {
+                                    inputArray.add("0.");
+                                } else {
+                                    inputArray.set(inputArray.size() - 1, inputArray.get(inputArray.size() - 1) + "0.");
+                                }
+                            }
                         } else {
                             textView.setText(textView.getText().toString() + ".");
-                            inputArray.add(".");
                             haveDot = true;
+                            inputArray.set(inputArray.size() - 1, inputArray.get(inputArray.size() - 1) + ".");
                         }
                     }
                 }
-
-                break;
-            case R.id.btnSubtraction:
-                if (!textView.getText().toString().contains("Infinity") || textView.getText().toString().contains("NaN")) {
-                    inputArray.add("-");
-                    textView.setText(textView.getText().toString() + "-");
-                } else {
-                    //TODO - работать с бесконечностью
-                    textView.setText("");
-                }
-                haveDot = false;
-                break;
-            case R.id.btnAddition:
-                if (!textView.getText().toString().contains("Infinity") || textView.getText().toString().contains("NaN")) {
-                    inputArray.add("-");
-                    textView.setText(textView.getText().toString() + "+");
-                } else {
-                    //TODO - работать с бесконечностью
-                    textView.setText("");
-                }
-                haveDot = false;
-                break;
-            case R.id.btnMultiplication:
-                if (!textView.getText().toString().contains("Infinity") || textView.getText().toString().contains("NaN")) {
-                    inputArray.add("-");
-                    textView.setText(textView.getText().toString() + "*");
-                } else {
-                    //TODO - работать с бесконечностью
-                    textView.setText("");
-                }
-                haveDot = false;
-                break;
-            case R.id.btnDivision:
-                if (!textView.getText().toString().contains("Infinity") || textView.getText().toString().contains("NaN")) {
-                    inputArray.add("-");
-                    textView.setText(textView.getText().toString() + "/");
-                } else {
-                    //TODO - работать с бесконечностью
-                    textView.setText("");
-                }
-                haveDot = false;
                 break;
             case R.id.btnBackspace:
-                if (textView.getText().toString().contains("Infinity") || textView.getText().toString().contains("NaN")) {
+                if (!textView.getText().toString().contains("Infinity") && !textView.getText().toString().contains("NaN") && !textView.getText().equals("")) {
                     textView.setText(textView.getText().toString().substring(0, textView.getText().toString().length() - 1));
-                    if(!inputArray.isEmpty()) {
-                        inputArray.remove(inputArray.size() - 1);
+                    if (!inputArray.isEmpty()) {
+                        if (!clickOperationButton) {
+                            if (inputArray.get(inputArray.size() - 1).substring(inputArray.get(inputArray.size() - 1).length() - 1).equals(".")) {
+                                haveDot = false;
+                            }
+                            inputArray.set(inputArray.size() - 1, inputArray.get(inputArray.size() - 1).substring(0, inputArray.get(inputArray.size() - 1).length() - 1));
+                        } else {
+                            inputArray.remove(inputArray.size() - 1);
+                        }
                     }
+                } else {
+                    textView.setText("");
+                    inputArray.clear();
                 }
                 break;
             case R.id.btnClear:
                 textView.setText("");
                 inputArray.clear();
-                break;
-            case R.id.btn0:
-                if (textView.getText().toString().equals("Infinity") || textView.getText().toString().equals("NaN")) {
-                    textView.setText("");
-                }
-                if (!textView.getText().toString().equals("0")) {
-                    textView.setText(textView.getText().toString() + "0");
-                    inputArray.add("0");
-                }
+                haveDot = false;
                 break;
             case R.id.btnEqual:
                 textView.setText(RPNConverter.ConvertRPNToResultString(RPNConverter.convertStringToRPN(inputArray)));
+                inputArray.clear();
+                inputArray.add(textView.getText().toString());
+                clickOperationButton = false;
                 break;
             default:
-                if (textView.getText().toString().equals("Infinity") || textView.getText().toString().equals("NaN")) {
-                    textView.setText("");
-                }
-                textView.setText(textView.getText().toString() + ((Button) view).getText().toString());
-                inputArray.add(((Button) view).getText().toString());
+                inputString(view);
                 break;
+        }
+    }
+
+    private void inputString(View view) {
+        String operations = "+-/*";
+        if (operations.contains(((Button) view).getText().toString())) {
+            if (!textView.getText().toString().contains("Infinity") && !textView.getText().toString().contains("NaN")) {
+                if (inputArray.isEmpty()) {
+                    if (((Button) view).getText().toString().equals("-")) {
+                        inputArray.add("-");
+                        clickOperationButton = false;
+                        textView.setText(textView.getText().toString() + ((Button) view).getText().toString());
+                    }
+                } else {
+                    inputArray.add(((Button) view).getText().toString());
+                    clickOperationButton = true;
+                    textView.setText(textView.getText().toString() + ((Button) view).getText().toString());
+                }
+            } else {
+                //TODO - работать с бесконечностью
+                textView.setText("");
+                clickOperationButton = true;
+            }
+            haveDot = false;
+        } else {
+            if (textView.getText().toString().equals("Infinity") || textView.getText().toString().equals("NaN")) {
+                textView.setText("");
+            }
+            if (clickOperationButton) {
+                inputArray.add(((Button) view).getText().toString());
+                clickOperationButton = false;
+            } else {
+                if (inputArray.isEmpty()) {
+                    inputArray.add(((Button) view).getText().toString());
+                } else {
+                    inputArray.set(inputArray.size() - 1, inputArray.get(inputArray.size() - 1) + ((Button) view).getText().toString());
+                }
+            }
+            textView.setText(textView.getText().toString() + ((Button) view).getText().toString());
         }
     }
 }
