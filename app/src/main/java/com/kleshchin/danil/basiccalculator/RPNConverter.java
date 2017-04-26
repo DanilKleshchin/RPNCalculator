@@ -18,8 +18,12 @@ import java.util.Stack;
 public class RPNConverter {
     private static final String firstPriority = "+-";
     private static final String secondPriority = "*/";
+    private static String result = "";
 
     public static ArrayList<String> convertStringToRPN(ArrayList<String> inputString) {
+        if(!isCorrectInputString(inputString)) {
+            return null;
+        }
         Stack<String> stack = new Stack<>();
         ArrayList<String> outputRPN = new ArrayList<>();
         inputString.add("~");
@@ -61,7 +65,13 @@ public class RPNConverter {
     }
 
     public static String ConvertRPNToResultString(ArrayList<String> inputRPN) {
-        String result = "";
+        if(result.equals("Error")) {
+            return result;
+        }
+        if(inputRPN.isEmpty()) {
+            result = "Error";
+            return result;
+        }
         inputRPN.add("~");
         Double firstValue, secondValue;
         Stack<String> stack = new Stack<>();
@@ -124,13 +134,24 @@ public class RPNConverter {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            //Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
         }
         return result;
     }
 
-    private String checkForCorrectInputting(ArrayList<String> inputArrayString ) {
-        String result = "";
-        return result;
+    private static Boolean isCorrectInputString(ArrayList<String> inputArrayString ) {
+        //beginning of inputString is operation
+        char [] operations = {'+', '-', '*', '/'};
+        for(char c : operations) {
+            if (inputArrayString.get(0).equals(String.valueOf(c))) {
+                result = "Error";
+                return false;
+
+            }
+        }
+
+
+
+
+        return false;
     }
 }
