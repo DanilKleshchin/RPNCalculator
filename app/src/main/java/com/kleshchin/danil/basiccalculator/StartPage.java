@@ -18,16 +18,18 @@ import java.util.ArrayList;
 public class StartPage extends AppCompatActivity implements View.OnClickListener {
     SharedPreferences sharedPreferences;
     Button btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btnAdd, btnMult, btnSub, btnDiv, btnClear, btnBackspace, btnDot, btnEqual;
-    TextView textView;
+    TextView mainTextView; /**Текстовое поле для отображения вводимых операции и результата*/
+    TextView smallTextView;/**Текстовое поле для отображения введенных действий после нажатия на "="*/
     ArrayList<String> inputArray = new ArrayList<>();
-    boolean haveDot = false;
-    boolean clickOperationButton = false;
+    boolean haveDot = false; /**Флаг для проверки количества ввода точки*/
+    boolean clickOperationButton = false; /**Флаг для проверки нажатия на знак операции, для того чтобы записывать нажатые цифры в одну лексему*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_page);
-        textView = (TextView) findViewById(R.id.textView);
+        mainTextView = (TextView) findViewById(R.id.mainTextView);
+        smallTextView = (TextView) findViewById(R.id.smallTextView);
         btn0 = (Button) findViewById(R.id.btn0);
         btn1 = (Button) findViewById(R.id.btn1);
         btn2 = (Button) findViewById(R.id.btn2);
@@ -69,9 +71,11 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
             sharedPreferences = getPreferences(MODE_PRIVATE);
             String res = sharedPreferences.getString("value", "");
             if (!res.equals("")) {
-                textView.setText(res);
+                mainTextView.setText(res);
                 inputArray.add(res);
             }
+            res = sharedPreferences.getString("expression", "");
+            smallTextView.setText(res);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,21 +84,37 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
     @Override
     protected void onStop() {
         super.onStop();
-        String res = textView.getText().toString();
+        String res = mainTextView.getText().toString();
+        String expression = "";
         if (!res.equals("")) {
             char[] operations = {'+', '-', '*', '/'};
             for (char c : operations) {
                 if (res.contains(String.valueOf(c))) {
                     res = RPNConverter.ConvertRPNToResultString(RPNConverter.convertStringToRPN(inputArray));
+                    expression = mainTextView.getText().toString();
                     break;
                 }
             }
         }
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("value", res);
+        editor.putString("expression", expression);
         editor.commit();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("value", mainTextView.getText().toString());
+        outState.putString("expression", smallTextView.getText().toString());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mainTextView.setText(savedInstanceState.getString("value"));
+        smallTextView.setText(savedInstanceState.getString("expression"));
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 
     @Override
     public void onClick(View view) {
@@ -102,9 +122,9 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
         switch (view.getId()) {
             case R.id.btnDot:
                 if (!haveDot) {
-                    if (!textView.getText().toString().contains("Infinity") && !textView.getText().toString().contains("NaN")) {
-                        if (textView.getText().toString().equals("")) {
-                            textView.setText("0.");
+                    if (!mainTextView.getText().toString().contains("Infinity") && !mainTextView.getText().toString().contains("NaN")) {
+                        if (mainTextView.getText().toString().equals("")) {
+                            mainTextView.setText("0.");
                             if (!clickOperationButton) {
                                 haveDot = true;
                                 if (inputArray.isEmpty()) {
@@ -114,16 +134,17 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
                                 }
                             }
                         } else {
-                            textView.setText(textView.getText().toString() + ".");
+                            mainTextView.setText(mainTextView.getText().toString() + ".");
                             haveDot = true;
                             inputArray.set(inputArray.size() - 1, inputArray.get(inputArray.size() - 1) + ".");
                         }
                     }
+                    smallTextView.setText("");
                 }
                 break;
             case R.id.btnBackspace:
-                if (!textView.getText().toString().contains("Infinity") && !textView.getText().toString().contains("NaN") && !textView.getText().equals("")) {
-                    textView.setText(textView.getText().toString().substring(0, textView.getText().toString().length() - 1));
+                if (!mainTextView.getText().toString().contains("Infinity") && !mainTextView.getText().toString().contains("NaN") && !mainTextView.getText().equals("")) {
+                    mainTextView.setText(mainTextView.getText().toString().substring(0, mainTextView.getText().toString().length() - 1));
                     if (!inputArray.isEmpty()) {
                         if (!clickOperationButton) {
                             if (inputArray.get(inputArray.size() - 1).substring(inputArray.get(inputArray.size() - 1).length() - 1).equals(".")) {
@@ -134,23 +155,28 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
                             inputArray.remove(inputArray.size() - 1);
                         }
                     }
+                    smallTextView.setText("");
                 } else {
-                    textView.setText("");
+                    mainTextView.setText("");
                     inputArray.clear();
+                    smallTextView.setText("");
                 }
                 break;
             case R.id.btnClear:
-                textView.setText("");
+                mainTextView.setText("");
+                smallTextView.setText("");
                 inputArray.clear();
                 haveDot = false;
                 break;
             case R.id.btnEqual:
-                textView.setText(RPNConverter.ConvertRPNToResultString(RPNConverter.convertStringToRPN(inputArray)));
+                smallTextView.setText(mainTextView.getText().toString());
+                mainTextView.setText(RPNConverter.ConvertRPNToResultString(RPNConverter.convertStringToRPN(inputArray)));
                 inputArray.clear();
-                inputArray.add(textView.getText().toString());
+                inputArray.add(mainTextView.getText().toString());
                 clickOperationButton = false;
                 break;
             default:
+                smallTextView.setText("");
                 inputString(view);
                 break;
         }
@@ -158,40 +184,40 @@ public class StartPage extends AppCompatActivity implements View.OnClickListener
 
     private void inputString(View view) {
         String operations = "+-/*";
-        if (operations.contains(((Button) view).getText().toString())) {
-            if (!textView.getText().toString().contains("Infinity") && !textView.getText().toString().contains("NaN")) {
+        if (operations.contains(((Button) view).getText().toString())) { /**Если входной параметр операция*/
+            if (!mainTextView.getText().toString().contains("Infinity") && !mainTextView.getText().toString().contains("NaN")) {
                 if (inputArray.isEmpty()) {
-                    if (((Button) view).getText().toString().equals("-")) {
+                    if (((Button) view).getText().toString().equals("-")) { /**Если самое первое число отрицательное, то знак "-" записывается вместе с числом как одна лексема*/
                         inputArray.add("-");
                         clickOperationButton = false;
-                        textView.setText(textView.getText().toString() + ((Button) view).getText().toString());
+                        mainTextView.setText(mainTextView.getText().toString() + ((Button) view).getText().toString());
                     }
                 } else {
                     inputArray.add(((Button) view).getText().toString());
                     clickOperationButton = true;
-                    textView.setText(textView.getText().toString() + ((Button) view).getText().toString());
+                    mainTextView.setText(mainTextView.getText().toString() + ((Button) view).getText().toString());
                 }
             } else {
                 //TODO - работать с бесконечностью
-                textView.setText("");
+                mainTextView.setText("");
                 clickOperationButton = true;
             }
             haveDot = false;
         } else {
-            if (textView.getText().toString().equals("Infinity") || textView.getText().toString().equals("NaN")) {
-                textView.setText("");
+            if (mainTextView.getText().toString().equals("Infinity") || mainTextView.getText().toString().equals("NaN")) {
+                mainTextView.setText("");
             }
             if (clickOperationButton) {
-                inputArray.add(((Button) view).getText().toString());
+                inputArray.add(((Button) view).getText().toString()); /**Начинаем новую лексему и добаляем в неё цифру*/
                 clickOperationButton = false;
             } else {
                 if (inputArray.isEmpty()) {
-                    inputArray.add(((Button) view).getText().toString());
+                    inputArray.add(((Button) view).getText().toString()); /**Начинаем новую лексему и добаляем в неё цифру т.к. массив лексем пуст*/
                 } else {
-                    inputArray.set(inputArray.size() - 1, inputArray.get(inputArray.size() - 1) + ((Button) view).getText().toString());
+                    inputArray.set(inputArray.size() - 1, inputArray.get(inputArray.size() - 1) + ((Button) view).getText().toString()); /**Добавляем входную цифру в лексему*/
                 }
             }
-            textView.setText(textView.getText().toString() + ((Button) view).getText().toString());
+            mainTextView.setText(mainTextView.getText().toString() + ((Button) view).getText().toString());
         }
     }
 }

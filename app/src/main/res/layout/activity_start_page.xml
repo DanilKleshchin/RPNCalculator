@@ -14,22 +14,29 @@
     android:background="@color/colorBackground"
     tools:context="com.kleshchin.danil.basiccalculator.StartPage">
 
-    <include
-        android:id="@+id/start_page_toolbar"
-        layout="@layout/toolbar" />
+    <TextView
+        android:id="@+id/smallTextView"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:textSize="15sp"
+        android:background="@color/colorButton"
+        android:textColor="@android:color/black"
+        >
+        </TextView>
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_weight="1">
+    android:layout_weight="0.8">
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/mainTextView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:maxLength="45"
         android:gravity="end"
         android:scrollHorizontally="true"
         android:textColor="@android:color/black"
-        android:textSize="25sp" />
+        android:textSize="20sp" />
 </LinearLayout>
 <LinearLayout
     android:layout_width="match_parent"
@@ -98,7 +105,7 @@
 
         <Button
             android:id="@+id/btnDivision"
-            android:textSize="35sp"
+            android:textSize="25sp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -144,7 +151,7 @@
 
         <Button
             android:id="@+id/btnMultiplication"
-            android:textSize="35sp"
+            android:textSize="25sp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -190,7 +197,7 @@
 
         <Button
             android:id="@+id/btnSubtraction"
-            android:textSize="35sp"
+            android:textSize="25sp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -206,10 +213,11 @@
 
         <Button
             android:id="@+id/btnDot"
-            android:textSize="55sp"
+            android:textSize="25sp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center_horizontal|top"
             android:text="."
             android:background="@drawable/button_border"
             android:layout_margin="2dp"/>
@@ -226,7 +234,7 @@
 
         <Button
             android:id="@+id/btnEqual"
-            android:textSize="35sp"
+            android:textSize="25sp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -236,7 +244,7 @@
 
         <Button
             android:id="@+id/btnAddition"
-            android:textSize="35sp"
+            android:textSize="25sp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"

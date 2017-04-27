@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2017. Created by Kleshchin Danil.
+  ~ Site: https://vk.com/danil.kleshchin.
+  ~ E-mail address: danil.kleshchin@gmail.com
+  -->
+
+<resources>
+    <string name="app_name">ОПЗ Калькулятор</string>
+    <string name="backspace">Удалить</string>
+    <string name="clear">Очистить</string>
+</resources>

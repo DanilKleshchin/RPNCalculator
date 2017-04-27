@@ -17,8 +17,17 @@ import java.util.Stack;
  */
 
 public class RPNConverter {
+    /**
+     * Данный класс предназначен для перевода входной последоветельности лексем в ОПЗ, выполнение арифметических оперций по правилам ОПЗ и вывода результата.
+     */
     private static final String firstPriority = "+-";
     private static final String secondPriority = "*/";
+
+    /**
+     * Перевод входных лексем в ОПЗ
+     * @param inputString - массив лексем.
+     * @return массив лексем, записанных в ОПЗ.
+     */
 
     public static ArrayList<String> convertStringToRPN(ArrayList<String> inputString) {
         Stack<String> stack = new Stack<>();
@@ -61,6 +70,11 @@ public class RPNConverter {
         return outputRPN;
     }
 
+    /**
+     * Подсчет результата
+     * @param inputRPN - входные лексемы в ОПЗ
+     * @return - результат операций
+     */
     public static String ConvertRPNToResultString(ArrayList<String> inputRPN) {
         String result = "";
         inputRPN.add("~");

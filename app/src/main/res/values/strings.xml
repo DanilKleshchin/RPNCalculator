@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">BasicCalculator</string>
+    <string name="app_name">RPN Calculator</string>
     <string name="clear">CLEAR</string>
     <string name="backspace">BACKSPACE</string>
-    <string name="basic_calculator">Basic calculator</string>
 </resources>
